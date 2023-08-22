@@ -14,7 +14,7 @@ import { saveBookIds, getSavedBookIds } from '../utils/localStorage'
 
 // import useMutation Hook and mutation
 import { useMutation } from '@apollo/client';
-import { SAVE_BOOK } from '../../utils/mutations';
+import { SAVE_BOOK } from '../utils/mutations';
 
 
 
