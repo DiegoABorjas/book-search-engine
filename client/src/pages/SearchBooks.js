@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'
 import {
   Container,
   Col,
@@ -6,43 +6,52 @@ import {
   Button,
   Card,
   Row
-} from 'react-bootstrap';
+} from 'react-bootstrap'
 
-import Auth from '../utils/auth';
-import { saveBook, searchGoogleBooks } from '../utils/API';
-import { saveBookIds, getSavedBookIds } from '../utils/localStorage';
+import Auth from '../utils/auth'
+import { searchGoogleBooks } from '../utils/API'
+import { saveBookIds, getSavedBookIds } from '../utils/localStorage'
+
+// import useMutation Hook and mutation
+import { useMutation } from '@apollo/client';
+import { SAVE_BOOK } from '../../utils/mutations';
+
+
 
 const SearchBooks = () => {
   // create state for holding returned google api data
-  const [searchedBooks, setSearchedBooks] = useState([]);
+  const [searchedBooks, setSearchedBooks] = useState([])
   // create state for holding our search field data
-  const [searchInput, setSearchInput] = useState('');
+  const [searchInput, setSearchInput] = useState('')
 
   // create state to hold saved bookId values
-  const [savedBookIds, setSavedBookIds] = useState(getSavedBookIds());
+  const [savedBookIds, setSavedBookIds] = useState(getSavedBookIds())
 
   // set up useEffect hook to save `savedBookIds` list to localStorage on component unmount
   // learn more here: https://reactjs.org/docs/hooks-effect.html#effects-with-cleanup
   useEffect(() => {
-    return () => saveBookIds(savedBookIds);
-  });
+    return () => saveBookIds(savedBookIds)
+  })
+
+  // use the SAVE_BOOK mutation
+  const [saveBook] = useMutation(SAVE_BOOK);
 
   // create method to search for books and set state on form submit
   const handleFormSubmit = async (event) => {
-    event.preventDefault();
+    event.preventDefault()
 
     if (!searchInput) {
-      return false;
+      return false
     }
 
     try {
-      const response = await searchGoogleBooks(searchInput);
+      const response = await searchGoogleBooks(searchInput)
 
       if (!response.ok) {
-        throw new Error('something went wrong!');
+        throw new Error('something went wrong!')
       }
 
-      const { items } = await response.json();
+      const { items } = await response.json()
 
       const bookData = items.map((book) => ({
         bookId: book.id,
@@ -50,40 +59,44 @@ const SearchBooks = () => {
         title: book.volumeInfo.title,
         description: book.volumeInfo.description,
         image: book.volumeInfo.imageLinks?.thumbnail || '',
-      }));
+      }))
 
-      setSearchedBooks(bookData);
-      setSearchInput('');
+      setSearchedBooks(bookData)
+      setSearchInput('')
     } catch (err) {
-      console.error(err);
+      console.error(err)
     }
-  };
+  }
 
   // create function to handle saving a book to our database
   const handleSaveBook = async (bookId) => {
     // find the book in `searchedBooks` state by the matching id
-    const bookToSave = searchedBooks.find((book) => book.bookId === bookId);
+    const bookToSave = searchedBooks.find((book) => book.bookId === bookId)
 
     // get token
-    const token = Auth.loggedIn() ? Auth.getToken() : null;
+    const token = Auth.loggedIn() ? Auth.getToken() : null
 
     if (!token) {
-      return false;
+      return false
     }
 
     try {
-      const response = await saveBook(bookToSave, token);
+      const response = await saveBook({
+        variables: {
+          input: bookToSave,
+        },
+      });
 
       if (!response.ok) {
-        throw new Error('something went wrong!');
+        throw new Error('something went wrong!')
       }
 
       // if book successfully saves to user's account, save book id to state
-      setSavedBookIds([...savedBookIds, bookToSave.bookId]);
+      setSavedBookIds([...savedBookIds, bookToSave.bookId])
     } catch (err) {
-      console.error(err);
+      console.error(err)
     }
-  };
+  }
 
   return (
     <>
@@ -143,12 +156,12 @@ const SearchBooks = () => {
                   </Card.Body>
                 </Card>
               </Col>
-            );
+            )
           })}
         </Row>
       </Container>
     </>
-  );
-};
+  )
+}
 
-export default SearchBooks;
+export default SearchBooks
