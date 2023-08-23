@@ -9,12 +9,11 @@ import {
 } from 'react-bootstrap'
 
 import Auth from '../utils/auth'
-import { searchGoogleBooks } from '../utils/API'
 import { saveBookIds, getSavedBookIds } from '../utils/localStorage'
 
 // import useMutation Hook and mutation
-import { useMutation } from '@apollo/client';
-import { SAVE_BOOK } from '../utils/mutations';
+import { useMutation } from '@apollo/client'
+import { SAVE_BOOK } from '../utils/mutations'
 
 
 
@@ -34,7 +33,7 @@ const SearchBooks = () => {
   })
 
   // use the SAVE_BOOK mutation
-  const [saveBook] = useMutation(SAVE_BOOK);
+  const [saveBook] = useMutation(SAVE_BOOK)
 
   // create method to search for books and set state on form submit
   const handleFormSubmit = async (event) => {
@@ -45,7 +44,9 @@ const SearchBooks = () => {
     }
 
     try {
-      const response = await searchGoogleBooks(searchInput)
+      const response = await fetch(
+        `https://www.googleapis.com/books/v1/volumes?q=${searchInput}`
+      )
 
       if (!response.ok) {
         throw new Error('something went wrong!')
@@ -85,11 +86,11 @@ const SearchBooks = () => {
         variables: {
           input: bookToSave,
         },
-      });
+      })
 
-      if (!response.ok) {
-        throw new Error('something went wrong!')
-      }
+      // if (!response.ok) {
+      //   throw new Error('something went wrong!')
+      // }
 
       // if book successfully saves to user's account, save book id to state
       setSavedBookIds([...savedBookIds, bookToSave.bookId])
@@ -134,8 +135,8 @@ const SearchBooks = () => {
         <Row>
           {searchedBooks.map((book) => {
             return (
-              <Col md="4">
-                <Card key={book.bookId} border='dark'>
+              <Col key={book.bookId} md="4">
+                <Card border='dark'>
                   {book.image ? (
                     <Card.Img src={book.image} alt={`The cover for ${book.title}`} variant='top' />
                   ) : null}
